@@ -17,15 +17,12 @@
 package models.reference
 
 import base.SpecBase
-import config.FrontendAppConfig
 import generators.Generators
-import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{Json, Reads}
 
 class DocTypeExciseSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "DocTypeExcise" - {
 
@@ -44,38 +41,19 @@ class DocTypeExciseSpec extends SpecBase with ScalaCheckPropertyChecks with Gene
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[DocTypeExcise] = DocTypeExcise.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val docTypeExcise = DocTypeExcise(code, description)
-              Json
-                .parse(s"""
-                     |{
-                     |  "code": "$code",
-                     |  "description": "$description"
-                     |}
-                     |""".stripMargin)
-                .as[DocTypeExcise] mustEqual docTypeExcise
-          }
-        }
 
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[DocTypeExcise] = DocTypeExcise.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val docTypeExcise = DocTypeExcise(code, description)
-              Json
-                .parse(s"""
+        implicit val reads: Reads[DocTypeExcise] = DocTypeExcise.reads
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (code, description) =>
+            val docTypeExcise = DocTypeExcise(code, description)
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$code",
                      |  "value": "$description"
                      |}
                      |""".stripMargin)
-                .as[DocTypeExcise] mustEqual docTypeExcise
-          }
+              .as[DocTypeExcise] mustEqual docTypeExcise
         }
       }
 

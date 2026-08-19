@@ -17,7 +17,6 @@
 package models.reference
 
 import cats.Order
-import config.FrontendAppConfig
 import models.{PackingType, Selectable}
 import org.apache.commons.text.StringEscapeUtils
 import play.api.libs.functional.syntax.*
@@ -35,9 +34,8 @@ case class PackageType(code: String, description: String, `type`: PackingType) e
 
 object PackageType {
 
-  def reads(`type`: PackingType)(config: FrontendAppConfig): Reads[PackageType] = {
-    val (codeField, descriptionField) =
-      if (config.isPhase6Enabled) ("key", "value") else ("code", "description")
+  def reads(`type`: PackingType): Reads[PackageType] = {
+    val (codeField, descriptionField) = ("key", "value")
 
     (
       (__ \ codeField).read[String] and

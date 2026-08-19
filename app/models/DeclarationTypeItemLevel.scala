@@ -17,7 +17,6 @@
 package models
 
 import cats.Order
-import config.FrontendAppConfig
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Format, Json, Reads}
 
@@ -31,15 +30,11 @@ case class DeclarationTypeItemLevel(code: String, description: String) extends R
 
 object DeclarationTypeItemLevel extends DynamicEnumerableType[DeclarationTypeItemLevel] {
 
-  def reads(config: FrontendAppConfig): Reads[DeclarationTypeItemLevel] =
-    if (config.isPhase6Enabled) {
-      (
-        (__ \ "key").read[String] and
-          (__ \ "value").read[String]
-      )(DeclarationTypeItemLevel.apply)
-    } else {
-      Json.reads[DeclarationTypeItemLevel]
-    }
+  val reads: Reads[DeclarationTypeItemLevel] =
+    (
+      (__ \ "key").read[String] and
+        (__ \ "value").read[String]
+    )(DeclarationTypeItemLevel.apply)
 
   implicit val format: Format[DeclarationTypeItemLevel] = Json.format[DeclarationTypeItemLevel]
 

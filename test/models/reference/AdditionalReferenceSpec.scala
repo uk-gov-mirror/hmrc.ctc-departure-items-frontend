@@ -17,8 +17,6 @@
 package models.reference
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import config.FrontendAppConfig
-import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -26,7 +24,6 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 
 class AdditionalReferenceSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "Additional Reference" - {
 
@@ -45,41 +42,21 @@ class AdditionalReferenceSpec extends SpecBase with AppWithDefaultMockFixtures w
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[AdditionalReference] = AdditionalReference.reads(mockFrontendAppConfig)
+        implicit val reads: Reads[AdditionalReference] = AdditionalReference.reads
 
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (documentType, description) =>
-              val additionalReference = AdditionalReference(documentType, description)
-              Json
-                .parse(s"""
-                     |{
-                     |  "documentType": "$documentType",
-                     |  "description": "$description"
-                     |}
-                     |""".stripMargin)
-                .as[AdditionalReference] mustEqual additionalReference
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[AdditionalReference] = AdditionalReference.reads(mockFrontendAppConfig)
-
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (documentType, description) =>
-              val additionalReference = AdditionalReference(documentType, description)
-              Json
-                .parse(s"""
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (documentType, description) =>
+            val additionalReference = AdditionalReference(documentType, description)
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$documentType",
                      |  "value": "$description"
                      |}
                      |""".stripMargin)
-                .as[AdditionalReference] mustEqual additionalReference
-          }
+              .as[AdditionalReference] mustEqual additionalReference
         }
+
       }
       "when reading from mongo" in {
         forAll(Gen.alphaNumStr, Gen.alphaNumStr) {

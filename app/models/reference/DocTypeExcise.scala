@@ -17,7 +17,6 @@
 package models.reference
 
 import cats.Order
-import config.FrontendAppConfig
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Json, OFormat, Reads}
 
@@ -25,20 +24,14 @@ case class DocTypeExcise(code: String, description: String)
 
 object DocTypeExcise {
 
-  def reads(config: FrontendAppConfig): Reads[DocTypeExcise] =
-    if (config.isPhase6Enabled) {
-      (
-        (__ \ "key").read[String] and
-          (__ \ "value").read[String]
-      )(DocTypeExcise.apply)
-    } else {
-      Json.reads[DocTypeExcise]
-    }
+  val reads: Reads[DocTypeExcise] =
+    (
+      (__ \ "key").read[String] and
+        (__ \ "value").read[String]
+    )(DocTypeExcise.apply)
 
-  def queryParams(code: String)(config: FrontendAppConfig): Seq[(String, String)] = {
-    val key = if (config.isPhase6Enabled) "keys" else "data.code"
-    Seq(key -> code)
-  }
+  def queryParams(code: String): Seq[(String, String)] =
+    Seq("keys" -> code)
 
   implicit val format: OFormat[DocTypeExcise] = Json.format[DocTypeExcise]
 

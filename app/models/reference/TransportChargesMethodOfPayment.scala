@@ -17,7 +17,6 @@
 package models.reference
 
 import cats.Order
-import config.FrontendAppConfig
 import models.{DynamicEnumerableType, Radioable}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Format, Json, Reads}
@@ -33,15 +32,11 @@ case class TransportChargesMethodOfPayment(method: String, description: String) 
 
 object TransportChargesMethodOfPayment extends DynamicEnumerableType[TransportChargesMethodOfPayment] {
 
-  def reads(config: FrontendAppConfig): Reads[TransportChargesMethodOfPayment] =
-    if (config.isPhase6Enabled) {
-      (
-        (__ \ "key").read[String] and
-          (__ \ "value").read[String]
-      )(TransportChargesMethodOfPayment.apply)
-    } else {
-      Json.reads[TransportChargesMethodOfPayment]
-    }
+  val reads: Reads[TransportChargesMethodOfPayment] =
+    (
+      (__ \ "key").read[String] and
+        (__ \ "value").read[String]
+    )(TransportChargesMethodOfPayment.apply)
 
   implicit val format: Format[TransportChargesMethodOfPayment] = Json.format[TransportChargesMethodOfPayment]
 

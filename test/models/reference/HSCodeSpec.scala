@@ -17,9 +17,7 @@
 package models.reference
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import config.FrontendAppConfig
 import generators.Generators
-import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -27,7 +25,6 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 
 class HSCodeSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks with Generators {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "HSCode" - {
 
@@ -45,36 +42,17 @@ class HSCodeSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[HSCode] = HSCode.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr) {
-            code =>
-              val hsCode = HSCode(code)
-              Json
-                .parse(s"""
-                     |{
-                     |  "code": "$code"
-                     |}
-                     |""".stripMargin)
-                .as[HSCode] mustEqual hsCode
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[HSCode] = HSCode.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr) {
-            code =>
-              val hsCode = HSCode(code)
-              Json
-                .parse(s"""
+        implicit val reads: Reads[HSCode] = HSCode.reads
+        forAll(Gen.alphaNumStr) {
+          code =>
+            val hsCode = HSCode(code)
+            Json
+              .parse(s"""
                          |{
                          |  "key": "$code"
                          |}
                          |""".stripMargin)
-                .as[HSCode] mustEqual hsCode
-          }
+              .as[HSCode] mustEqual hsCode
         }
       }
 

@@ -17,15 +17,12 @@
 package models.reference
 
 import base.SpecBase
-import config.FrontendAppConfig
-import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{Json, Reads}
 
 class TransportChargesMethodOfPaymentSpec extends SpecBase with ScalaCheckPropertyChecks {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "MethodOfPayment" - {
 
@@ -44,38 +41,18 @@ class TransportChargesMethodOfPaymentSpec extends SpecBase with ScalaCheckProper
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[TransportChargesMethodOfPayment] = TransportChargesMethodOfPayment.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (method, description) =>
-              val methodOfPayment = TransportChargesMethodOfPayment(method, description)
-              Json
-                .parse(s"""
-                     |{
-                     |  "method": "$method",
-                     |  "description": "$description"
-                     |}
-                     |""".stripMargin)
-                .as[TransportChargesMethodOfPayment] mustEqual methodOfPayment
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[TransportChargesMethodOfPayment] = TransportChargesMethodOfPayment.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (method, description) =>
-              val methodOfPayment = TransportChargesMethodOfPayment(method, description)
-              Json
-                .parse(s"""
+        implicit val reads: Reads[TransportChargesMethodOfPayment] = TransportChargesMethodOfPayment.reads
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (method, description) =>
+            val methodOfPayment = TransportChargesMethodOfPayment(method, description)
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$method",
                      |  "value": "$description"
                      |}
                      |""".stripMargin)
-                .as[TransportChargesMethodOfPayment] mustEqual methodOfPayment
-          }
+              .as[TransportChargesMethodOfPayment] mustEqual methodOfPayment
         }
       }
       "when reading from mongo" in {

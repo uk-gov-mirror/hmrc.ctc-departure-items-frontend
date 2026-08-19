@@ -17,11 +17,9 @@
 package models.reference
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import config.FrontendAppConfig
 import generators.Generators
 import models.PackingType
 import models.PackingType.*
-import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -29,7 +27,6 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 
 class PackageTypeSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks with Generators {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "PackageType" - {
 
@@ -49,36 +46,17 @@ class PackageTypeSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[PackageType] = PackageType.reads(Bulk)(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val json = Json.parse(s"""
-                   |{
-                   |  "code": "$code",
-                   |  "description": "$description",
-                   |  "type": "Bulk"
-                   |}
-                   |""".stripMargin)
-              json.as[PackageType] mustEqual PackageType(code, description, Bulk)
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[PackageType] = PackageType.reads(Bulk)(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val json = Json.parse(s"""
+        implicit val reads: Reads[PackageType] = PackageType.reads(Bulk)
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (code, description) =>
+            val json = Json.parse(s"""
                    |{
                    |  "key": "$code",
                    |  "value": "$description",
                    |  "type": "Bulk"
                    |}
                    |""".stripMargin)
-              json.as[PackageType] mustEqual PackageType(code, description, Bulk)
-          }
+            json.as[PackageType] mustEqual PackageType(code, description, Bulk)
         }
       }
 
