@@ -17,17 +17,13 @@
 package models.reference
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import config.FrontendAppConfig
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{Json, Reads}
-import org.mockito.Mockito.when
 import uk.gov.hmrc.govukfrontend.views.viewmodels.select.SelectItem
 
 class AdditionalInformationSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
-
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "Additional Information" - {
 
@@ -46,41 +42,21 @@ class AdditionalInformationSpec extends SpecBase with AppWithDefaultMockFixtures
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[AdditionalInformation] = AdditionalInformation.reads(mockFrontendAppConfig)
+        implicit val reads: Reads[AdditionalInformation] = AdditionalInformation.reads
 
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val additionalInformation = AdditionalInformation(code, description)
-              Json
-                .parse(s"""
-                     |{
-                     |  "code": "$code",
-                     |  "description": "$description"
-                     |}
-                     |""".stripMargin)
-                .as[AdditionalInformation] mustEqual additionalInformation
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[AdditionalInformation] = AdditionalInformation.reads(mockFrontendAppConfig)
-
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val additionalInformation = AdditionalInformation(code, description)
-              Json
-                .parse(s"""
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (code, description) =>
+            val additionalInformation = AdditionalInformation(code, description)
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$code",
                      |  "value": "$description"
                      |}
                      |""".stripMargin)
-                .as[AdditionalInformation] mustEqual additionalInformation
-          }
+              .as[AdditionalInformation] mustEqual additionalInformation
         }
+
       }
       "when reading from mongo" in {
         forAll(Gen.alphaNumStr, Gen.alphaNumStr) {

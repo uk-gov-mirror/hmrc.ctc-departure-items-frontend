@@ -17,14 +17,11 @@
 package models
 
 import base.SpecBase
-import config.FrontendAppConfig
-import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{Json, Reads}
 
 class DeclarationTypeItemLevelSpec extends SpecBase with ScalaCheckPropertyChecks {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "DeclarationTypeItemLevel" - {
 
@@ -43,40 +40,19 @@ class DeclarationTypeItemLevelSpec extends SpecBase with ScalaCheckPropertyCheck
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[DeclarationTypeItemLevel] = DeclarationTypeItemLevel.reads(mockFrontendAppConfig)
+        implicit val reads: Reads[DeclarationTypeItemLevel] = DeclarationTypeItemLevel.reads
 
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val declarationTypeItemLevel = DeclarationTypeItemLevel(code, description)
-              Json
-                .parse(s"""
-                     |{
-                     |  "code": "$code",
-                     |  "description": "$description"
-                     |}
-                     |""".stripMargin)
-                .as[DeclarationTypeItemLevel] mustEqual declarationTypeItemLevel
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[DeclarationTypeItemLevel] = DeclarationTypeItemLevel.reads(mockFrontendAppConfig)
-
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val declarationTypeItemLevel = DeclarationTypeItemLevel(code, description)
-              Json
-                .parse(s"""
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (code, description) =>
+            val declarationTypeItemLevel = DeclarationTypeItemLevel(code, description)
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$code",
                      |  "value": "$description"
                      |}
                      |""".stripMargin)
-                .as[DeclarationTypeItemLevel] mustEqual declarationTypeItemLevel
-          }
+              .as[DeclarationTypeItemLevel] mustEqual declarationTypeItemLevel
         }
       }
       "when reading from mongo" in {

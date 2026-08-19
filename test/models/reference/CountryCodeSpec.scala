@@ -17,14 +17,11 @@
 package models.reference
 
 import base.SpecBase
-import config.FrontendAppConfig
-import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsString, Json}
 
 class CountryCodeSpec extends SpecBase with ScalaCheckPropertyChecks {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "CountryCode" - {
 
@@ -46,32 +43,15 @@ class CountryCodeSpec extends SpecBase with ScalaCheckPropertyChecks {
       }
 
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          forAll(Gen.alphaNumStr) {
-            code =>
-              Json
-                .parse(s"""
-                     |{
-                     |  "code": "$code"
-                     |}
-                     |""".stripMargin)
-                .as[CountryCode](CountryCode.reads(mockFrontendAppConfig)) mustEqual CountryCode(code)
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          forAll(Gen.alphaNumStr) {
-            code =>
-              Json
-                .parse(s"""
+        forAll(Gen.alphaNumStr) {
+          code =>
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$code"
                      |}
                      |""".stripMargin)
-                .as[CountryCode](CountryCode.reads(mockFrontendAppConfig)) mustEqual CountryCode(code)
-          }
+              .as[CountryCode](CountryCode.reads) mustEqual CountryCode(code)
         }
       }
     }

@@ -17,14 +17,11 @@
 package models.reference
 
 import base.SpecBase
-import config.FrontendAppConfig
-import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{Json, Reads}
 
 class SupplyChainActorTypeSpec extends SpecBase with ScalaCheckPropertyChecks {
-  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "SupplyChainActorType" - {
 
@@ -43,38 +40,18 @@ class SupplyChainActorTypeSpec extends SpecBase with ScalaCheckPropertyChecks {
 
     "must deserialise" - {
       "when reading from reference data" - {
-        "when phase 5" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(false)
-          implicit val reads: Reads[SupplyChainActorType] = SupplyChainActorType.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val supplyChainActorType = SupplyChainActorType(code, description)
-              Json
-                .parse(s"""
-                     |{
-                     |  "role": "$code",
-                     |  "description": "$description"
-                     |}
-                     |""".stripMargin)
-                .as[SupplyChainActorType] mustEqual supplyChainActorType
-          }
-        }
-
-        "when phase 6" in {
-          when(mockFrontendAppConfig.isPhase6Enabled).thenReturn(true)
-          implicit val reads: Reads[SupplyChainActorType] = SupplyChainActorType.reads(mockFrontendAppConfig)
-          forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-            (code, description) =>
-              val supplyChainActorType = SupplyChainActorType(code, description)
-              Json
-                .parse(s"""
+        implicit val reads: Reads[SupplyChainActorType] = SupplyChainActorType.reads
+        forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+          (code, description) =>
+            val supplyChainActorType = SupplyChainActorType(code, description)
+            Json
+              .parse(s"""
                      |{
                      |  "key": "$code",
                      |  "value": "$description"
                      |}
                      |""".stripMargin)
-                .as[SupplyChainActorType] mustEqual supplyChainActorType
-          }
+              .as[SupplyChainActorType] mustEqual supplyChainActorType
         }
       }
       "when reading from mongo" in {
